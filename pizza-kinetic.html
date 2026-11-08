@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>다시, 주문 수로 · 피자 9개 매장 실적 키네틱 타이포</title>
+<meta name="description" content="피자 프랜차이즈 9개 매장 80개월 실적의 시사점 3가지를 담은 30초 키네틱 타이포그래피">
+<style>
+  html, body { margin: 0; height: 100%; background: #12052a; color: #FFF4E2; font-family: system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif; }
+  body { display: flex; flex-direction: column; }
+  #view { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+  #stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden; }
+  #stage > .scene { position: absolute; inset: 0; }
+  #bar { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: #1c0a3c; }
+  #bar button { font: inherit; font-size: 14px; color: #FFF4E2; background: #3a1873; border: 0; border-radius: 8px; padding: 8px 14px; cursor: pointer; min-width: 44px; }
+  #bar button:hover { background: #4d2295; }
+  #bar button:focus-visible { outline: 2px solid #F6C445; outline-offset: 2px; }
+  #scrub { flex: 1; accent-color: #F6C445; min-width: 0; }
+  #time { font-variant-numeric: tabular-nums; font-size: 14px; opacity: .8; min-width: 92px; text-align: right; }
+#stage { --ground:#2B0F57; --main:#7823DC; --second:#FFF4E2; --accent:#F6C445; color:var(--second); font-family:var(--sans, system-ui, sans-serif) }
+.ground { position:absolute; inset:0; background:var(--ground); overflow:hidden }
+.words { position:absolute; margin:0; display:flex; flex-direction:column; gap:20px } .words > * { margin:0 }
+.line { font-size:120px; line-height:1.1; font-weight:800; letter-spacing:-0.03em; text-shadow:0 4px 18px rgba(0,0,0,.35) } .sub { font-size:44px; font-weight:500; line-height:1.35; text-shadow:0 2px 10px rgba(0,0,0,.4) }
+#stage { --deep:color-mix(in srgb, var(--ground) 70%, #000); --gridline:color-mix(in srgb, var(--second) 22%, transparent); --ghost:color-mix(in srgb, var(--second) 9%, transparent); --soft:color-mix(in srgb, var(--second) 78%, var(--main)); --lilac:color-mix(in srgb, var(--main) 38%, var(--second)) }
+.art { position:absolute; inset:0; width:100%; height:100%; overflow:visible }
+.shade { position:absolute; inset:0; background:linear-gradient(90deg, color-mix(in srgb, var(--deep) 62%, transparent), color-mix(in srgb, var(--deep) 30%, transparent) 70%, color-mix(in srgb, var(--deep) 10%, transparent)), radial-gradient(120% 90% at 40% 45%, transparent 45%, color-mix(in srgb, var(--deep) 80%, transparent)) }
+.w { display:inline-block; overflow:hidden; vertical-align:bottom; padding:0.04em 0.02em 0.12em; margin:-0.04em 0 -0.12em } .w > i { display:inline-block; font-style:normal }
+.kicker { font-size:30px; font-weight:700; letter-spacing:0.18em; color:var(--accent) }
+.num { font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-0.04em; line-height:1; text-shadow:0 6px 24px rgba(0,0,0,.35) }
+.hi { color:var(--accent) } .mint { color:var(--lilac) } .soft { color:var(--soft) }
+.bar { position:absolute; height:14px; border-radius:7px; transform-origin:0 50% }
+.ghost { position:absolute; font-weight:900; color:var(--ghost); line-height:0.8; letter-spacing:-0.06em; white-space:nowrap }
+</style>
+</head>
+<body>
+<div id="view"><div id="stage"></div></div>
+<div id="bar">
+  <button id="play" type="button" aria-label="재생/일시정지">❚❚</button>
+  <button id="sound" type="button" aria-label="소리 켜기">🔇 소리</button>
+  <input id="scrub" type="range" min="0" max="30" step="0.01" value="0" aria-label="재생 위치">
+  <span id="time">0.0 / 30.0</span>
+</div>
+<script>
+'use strict';
+const CUT = {"v": 1, "stage": "final", "look": "Swirling night canvas: big Korean type and counting figures rise and swap over thick post-impressionist brushstrokes in deep violet that curl round slow eddies, a few yellow strokes; user asked for a Van Gogh-like painting style centred on Kearney purple; plain", "palettes": [["#2B0F57", "#7823DC", "#FFF4E2", "#F6C445"], ["#1B1410", "#F2A541", "#FFF4E6", "#E4572E"], ["#EEF3EA", "#2F6B3A", "#14261A", "#E0662F"], ["#1D3B8A", "#FFD23F", "#FFFFFF", "#7FE0C4"]], "theirs": 1, "width": 1920, "height": 1080, "fps": 60, "background": "#2B0F57", "scenes": [{"id": "open", "name": "80개월의 실적", "dur": 4, "desc": "제목이 한 줄씩 밀려 들어오며 9개 매장, 80개월 실적을 소개한다."}, {"id": "price", "name": "가격이 키운 매출", "dur": 6, "desc": "매출 +16%가 솟아오르고, 주문 -1%가 떨어지며, 객단가 +17%가 그 사이를 설명한다."}, {"id": "app", "name": "자사앱의 착시", "dur": 6.5, "desc": "자사앱 비중이 5.5%에서 31%로 커지지만 배달앱 주문 10.6만 건은 그대로이고 건당 수수료는 36% 오른다."}, {"id": "stores", "name": "벌어지는 매장", "dur": 6.5, "desc": "서면점 이익률은 위로, 충장로점은 아래로 갈라지며 격차의 원인이 운영임을 말한다."}, {"id": "next", "name": "다음 한 수", "dur": 7, "desc": "세 가지 실행 과제가 차례로 쌓이고 엔드 카드로 멈춘다."}]};
+const SCENE_SRC = {};
+// ---- kit: the helpers the scenes were written against ----
+const clamp01 = (x) => Math.max(0, Math.min(1, x));
+const base = {
+  W: 1920, H: 1080,
+  clamp01, clamp: (x, a, b) => Math.max(a, Math.min(b, x)),
+  seg: (t, a, b) => clamp01((t - a) / (b - a)),
+  lerp: (a, b, p) => a + (b - a) * p,
+  eo: (x) => 1 - Math.pow(1 - x, 3),
+  ei: (x) => x * x * x,
+  eio: (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2),
+  eob: (x, s) => { s = s || 1.4; const c = s + 1; return 1 + c * Math.pow(x - 1, 3) + s * Math.pow(x - 1, 2); },
+  h(html) { const tp = document.createElement('template'); tp.innerHTML = html.trim(); return tp.content.firstElementChild; },
+};
+var kit = Object.assign({}, base);
+</script>
+<script>
+// A painted night field in thick swirling strokes. Every scene sits on it; words do the moving.
+const K = {
+  clamp01: (x) => Math.max(0, Math.min(1, x)),
+  eo: (x) => 1 - Math.pow(1 - x, 3),
+  ei: (x) => x * x * x,
+  eio: (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2),
+  eob: (x, s) => { s = s || 1.4; const c = s + 1; return 1 + c * Math.pow(x - 1, 3) + s * Math.pow(x - 1, 2); },
+  rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; },
+};
+const TONES = [
+  'color-mix(in srgb, var(--main) 22%, var(--ground))', 'color-mix(in srgb, var(--main) 34%, var(--ground))',
+  'color-mix(in srgb, var(--main) 46%, var(--ground))', 'color-mix(in srgb, var(--main) 60%, var(--ground))',
+  'color-mix(in srgb, var(--second) 16%, var(--ground))', 'color-mix(in srgb, var(--ground) 70%, #000)',
+  'color-mix(in srgb, var(--accent) 30%, var(--ground))',
+];
+const SWIRLS = [[1520, 250, 270, 1], [360, 840, 230, -1], [980, 560, 160, 1]];
+function flow(x, y) {
+  let a = Math.sin(x * 0.0032 + y * 0.0021) * 1.1 + Math.cos(y * 0.0058 - x * 0.0011) * 0.7;
+  for (const [cx, cy, R, d] of SWIRLS) {
+    const dx = x - cx, dy = y - cy, w = Math.exp(-Math.hypot(dx, dy) / R);
+    a = a * (1 - w) + (Math.atan2(dy, dx) + d * Math.PI / 2) * w;
+  }
+  return a;
+}
+window.W = {
+  // The painted field: strokes follow one flow, curling round three eddies. Same world in every scene, seen from its own seed.
+  paper(id) {
+    const r = K.rng(31 + id.length * 17 + id.charCodeAt(0));
+    let s = '<svg class="art ' + id + '-paper" viewBox="0 0 1920 1080"><rect x="-200" y="-200" width="2320" height="1480" style="fill:var(--ground)"/><g class="' + id + '-strokes" style="fill:none;stroke-linecap:round">';
+    for (let gy = -50; gy < 1140; gy += 92) for (let gx = -70; gx < 2000; gx += 100) {
+      const x = gx + r() * 70, y = gy + r() * 64, a = flow(x, y), L = 50 + r() * 46, c = Math.cos(a), n = Math.sin(a), b = (r() - 0.5) * 22;
+      const pick = r(), tone = TONES[pick < 0.05 ? 6 : pick < 0.13 ? 4 : pick < 0.22 ? 5 : Math.floor(r() * 4)];
+      s += '<path d="M' + (x - c * L / 2).toFixed(0) + ' ' + (y - n * L / 2).toFixed(0) + ' Q' + (x - n * b).toFixed(0) + ' ' + (y + c * b).toFixed(0) + ' ' + (x + c * L / 2).toFixed(0) + ' ' + (y + n * L / 2).toFixed(0) + '" style="stroke:' + tone + ';stroke-width:' + (11 + r() * 10).toFixed(1) + '"/>';
+    }
+    s += '</g>';
+    for (const [cx, cy, R, d] of SWIRLS) {
+      s += '<g class="swirl" data-d="' + d + '" transform="translate(' + cx + ' ' + cy + ')" style="fill:none;stroke-linecap:round">';
+      for (let k = 0; k < 11; k++) {
+        const rr = 26 + k * (R - 30) / 11, a0 = r() * 6.28, sp = 1.4 + r() * 1.6, tone = TONES[k % 3 === 0 ? 3 : k % 3 === 1 ? 2 : (r() < 0.3 ? 6 : 1)];
+        s += '<path d="M' + (rr * Math.cos(a0)).toFixed(0) + ' ' + (rr * Math.sin(a0)).toFixed(0) + ' A' + rr.toFixed(0) + ' ' + rr.toFixed(0) + ' 0 0 1 ' + (rr * Math.cos(a0 + sp)).toFixed(0) + ' ' + (rr * Math.sin(a0 + sp)).toFixed(0) + '" style="stroke:' + tone + ';stroke-width:' + (12 + r() * 8).toFixed(1) + '"/>';
+      }
+      s += '</g>';
+    }
+    return s + '</svg>';
+  },
+  // Wrap every word of an element in a mask so it can rise out of its own baseline.
+  split(el) {
+    const words = el.textContent.split(' ');
+    el.textContent = '';
+    return words.map((w, i) => {
+      const box = document.createElement('span'); box.className = 'w';
+      const inner = document.createElement('i'); inner.textContent = w;
+      box.appendChild(inner); el.appendChild(box);
+      if (i < words.length - 1) el.appendChild(document.createTextNode(' '));
+      return inner;
+    });
+  },
+  // Words rise from below with a small overshoot, staggered; leave by sliding up.
+  rise(list, t, t0, opt) {
+    const o = Object.assign({ stagger: 0.11, dur: 0.6, out: null, outDur: 0.45 }, opt || {});
+    list.forEach((el, i) => {
+      const p = K.clamp01((t - t0 - i * o.stagger) / o.dur);
+      let y = (1 - K.eob(p, 1.5)) * 110, r = (1 - K.eo(p)) * 6;
+      if (o.out != null) { const q = K.clamp01((t - o.out - i * 0.05) / o.outDur); y -= K.ei(q) * 115; }
+      el.style.transform = 'translateY(' + y.toFixed(2) + '%) rotate(' + r.toFixed(2) + 'deg)';
+    });
+  },
+  // A counter: from half-way to its value, eased, in the given format.
+  count(el, to, t, t0, dur, fmt) {
+    const p = K.eo(K.clamp01((t - t0) / dur));
+    el.textContent = fmt(to * (0.5 + 0.5 * p));
+  },
+  // Slow drift of the painted field; its eddies keep turning, so no frame ever freezes.
+  drift(el, t, dx, dy, s0, s1, dur) {
+    const p = K.clamp01(t / dur);
+    el.style.transform = 'translate(' + (dx * p).toFixed(2) + 'px,' + (dy * p).toFixed(2) + 'px) scale(' + (s0 + (s1 - s0) * K.eio(p)).toFixed(4) + ')';
+    if (!el._sw) el._sw = Array.from(el.querySelectorAll('.swirl')).map((g) => [g, g.getAttribute('transform'), +g.getAttribute('data-d')]);
+    for (const [g, base, d] of el._sw) g.setAttribute('transform', base + ' rotate(' + (d * t * 9).toFixed(2) + ')');
+  },
+};
+</script>
+<script>
+SCENE_SRC["open"] = function (kit) {
+const { seg, lerp, eo, eio, clamp01 } = kit;
+kit.scene('open', {
+  init(kit) {
+    kit.stage.append(kit.h('<div class="ground">' + W.paper('open') +
+      '<div class="ghost open-ghost" style="right:-40px;bottom:-60px;font-size:860px">80</div>' +
+      '<div class="shade"></div>' +
+      '<div class="bar open-rule" style="left:160px;top:300px;width:420px;background:var(--accent)"></div>' +
+      '<div class="words open-words" style="left:160px;top:360px;width:1500px">' +
+        '<p class="kicker open-kick">피자 프랜차이즈 9개 매장 · 2020–2026</p>' +
+        '<h1 class="line open-l1" style="font-size:150px">80개월의 실적이</h1>' +
+        '<h1 class="line hi open-l2" style="font-size:150px">말해 준 세 가지</h1>' +
+      '</div></div>'));
+    const q = (s) => kit.stage.querySelector(s);
+    this.ghost = q('.open-ghost'); this.rule = q('.open-rule'); this.wrap = q('.open-words');
+    this.kick = W.split(q('.open-kick'));
+    this.l1 = W.split(q('.open-l1'));
+    this.l2 = W.split(q('.open-l2'));
+    this.paper = q('.open-paper');
+  },
+  render(t) {
+    W.drift(this.paper, t, -30, -12, 1.0, 1.03, 4);
+    this.ghost.style.transform = 'translateX(' + lerp(60, -40, eio(seg(t, -0.5, 4))) + 'px)';
+    this.ghost.style.opacity = 0.6 + 0.4 * eo(seg(t, -0.5, 1.2));
+    this.rule.style.transform = 'scaleX(' + eo(seg(t, -0.6, 0.6)).toFixed(3) + ')';
+    W.rise(this.kick, t, -0.5, { stagger: 0.04, dur: 0.5, out: 3.3 });
+    W.rise(this.l1, t, -0.35, { stagger: 0.13, out: 3.35 });
+    W.rise(this.l2, t, 0.35, { stagger: 0.16, out: 3.45 });
+    this.wrap.style.transform = 'translateX(' + (-2 * t).toFixed(2) + 'px)';
+    this.rule.style.opacity = 1 - clamp01((t - 3.3) / 0.4);
+  },
+});
+};
+SCENE_SRC["price"] = function (kit) {
+const { seg, lerp, eo, ei, eio, eob, clamp01 } = kit;
+kit.scene('price', {
+  init(kit) {
+    kit.stage.append(kit.h('<div class="ground">' + W.paper('price') + '<div class="shade"></div>' +
+      '<div class="price-cam" style="position:absolute;inset:0">' +
+      '<div class="words" style="left:160px;top:110px"><p class="kicker price-kick">시사점 1 · 1~8월 기준, 2023 → 2026</p></div>' +
+      '<div class="words price-a" style="left:160px;top:200px;gap:4px"><p class="sub soft price-la">매출</p><p class="num hi price-na" style="font-size:250px">+16%</p></div>' +
+      '<div class="words price-b" style="left:1020px;top:200px;gap:4px"><p class="sub soft price-lb">주문 건수</p><p class="num price-nb" style="font-size:250px">−1%</p></div>' +
+      '<div style="position:absolute;left:160px;top:560px;width:760px;height:2px;background:var(--gridline)"></div>' +
+      '<div class="bar price-ba" style="left:160px;top:520px;width:640px;background:var(--accent)"></div>' +
+      '<div class="bar price-bb" style="left:1020px;top:520px;width:640px;background:var(--second)"></div>' +
+      '<div class="price-tick" style="position:absolute;left:800px;top:500px;width:4px;height:54px;background:var(--soft)"></div>' +
+      '<div class="price-tick2" style="position:absolute;left:1660px;top:500px;width:4px;height:54px;background:var(--soft)"></div>' +
+      '<div class="words" style="left:160px;bottom:130px;width:1600px"><h2 class="line mint price-l" style="font-size:104px">올린 건 가격, 객단가 +17%</h2><p class="sub soft price-s">고객 수는 2023년 이후 제자리입니다</p></div>' +
+      '</div></div>'));
+    const q = (s) => kit.stage.querySelector(s);
+    Object.assign(this, { cam: q('.price-cam'), paper: q('.price-paper'), na: q('.price-na'), nb: q('.price-nb'), ba: q('.price-ba'), bb: q('.price-bb'), b: q('.price-b'), tick: q('.price-tick'), tick2: q('.price-tick2') });
+    this.kick = W.split(q('.price-kick'));
+    this.la = W.split(q('.price-la')); this.lb = W.split(q('.price-lb'));
+    this.line = W.split(q('.price-l')); this.sub = W.split(q('.price-s'));
+  },
+  render(t) {
+    W.drift(this.paper, t, 24, -10, 1.02, 1.05, 6);
+    this.cam.style.transform = 'scale(' + lerp(1.0, 1.025, eio(seg(t, 0, 6))) + ')';
+    W.rise(this.kick, t, 0, { stagger: 0.03, dur: 0.45 });
+    W.rise(this.la, t, 0.15);
+    const pa = eob(clamp01((t - 0.25) / 0.7), 1.6);
+    this.na.style.transform = 'translateY(' + lerp(120, 0, pa).toFixed(1) + 'px) scale(' + (1 + 0.04 * Math.sin(Math.min(t, 6) * 2.1) * seg(t, 1.2, 1.6)).toFixed(4) + ')';
+    this.na.style.opacity = eo(seg(t, 0.25, 0.6));
+    W.count(this.na, 16, t, 0.25, 1.1, (v) => '+' + Math.round(v) + '%');
+    this.ba.style.transform = 'scaleX(' + (lerp(0, 1.16, eo(seg(t, 0.3, 1.4)))).toFixed(3) + ')';
+    this.tick.style.opacity = eo(seg(t, 0.2, 0.6));
+    // 주문: 떨어져 내려오는 무게
+    W.rise(this.lb, t, 1.4);
+    const fall = clamp01((t - 1.55) / 0.55), land = seg(t, 2.1, 2.5);
+    const sq = 1 - 0.12 * Math.sin(Math.PI * land);
+    this.nb.style.transformOrigin = '0 100%';
+    this.nb.style.transform = 'translateY(' + lerp(-260, 0, ei(fall)).toFixed(1) + 'px) scale(' + (2 - sq).toFixed(3) + ',' + sq.toFixed(3) + ')';
+    this.nb.style.opacity = eo(seg(t, 1.55, 1.8)) * lerp(1, 0.55, eo(seg(t, 2.6, 3.2)));
+    this.bb.style.transform = 'scaleX(' + lerp(0, 0.99, eo(seg(t, 1.7, 2.6))).toFixed(3) + ')';
+    this.bb.style.opacity = lerp(1, 0.5, eo(seg(t, 2.6, 3.2)));
+    this.tick2.style.opacity = eo(seg(t, 1.6, 2.0));
+    W.rise(this.line, t, 3.0, { stagger: 0.14 });
+    W.rise(this.sub, t, 3.9, { stagger: 0.08 });
+  },
+});
+};
+SCENE_SRC["app"] = function (kit) {
+const { seg, lerp, eo, ei, eio, eob, clamp01 } = kit;
+kit.scene('app', {
+  init(kit) {
+    kit.stage.append(kit.h('<div class="ground">' + W.paper('app') + '<div class="shade"></div>' +
+      '<div class="app-cam" style="position:absolute;inset:0">' +
+      '<div class="words" style="left:160px;top:110px"><p class="kicker app-kick">시사점 2 · 주문 채널</p></div>' +
+      '<div class="words" style="left:160px;top:190px;gap:4px"><p class="sub soft app-la">자사앱 주문 비중</p><p class="num mint app-na" style="font-size:200px">31%</p></div>' +
+      '<div class="app-track" style="position:absolute;left:160px;top:470px;width:760px;height:14px;border-radius:7px;background:var(--gridline)"></div>' +
+      '<div class="bar app-fill" style="left:160px;top:470px;width:760px;background:var(--lilac)"></div>' +
+      '<div class="words app-b" style="left:1040px;top:190px;gap:4px"><p class="sub soft app-lb">배달앱 주문 (1~8월)</p><p class="num app-nb" style="font-size:170px;padding-top:22px">10.6만 건</p></div>' +
+      '<div class="app-frame" style="position:absolute;left:1010px;top:250px;width:790px;height:250px;border:4px solid var(--second);border-radius:14px;opacity:0"></div>' +
+      '<div class="app-stamp" style="position:absolute;left:1560px;top:226px;padding:6px 18px;font-size:34px;font-weight:800;background:var(--second);color:var(--ground);border-radius:8px">그대로</div>' +
+      '<div class="words" style="left:160px;top:590px;width:1600px"><h2 class="line hi app-l" style="font-size:112px">건당 수수료는 +36%</h2></div>' +
+      '<div class="words" style="left:160px;bottom:120px;width:1600px"><p class="sub app-s" style="font-size:50px">자사앱은 배달앱이 아니라 홀·포장 고객을 옮겨 왔습니다</p></div>' +
+      '</div></div>'));
+    const q = (s) => kit.stage.querySelector(s);
+    Object.assign(this, { cam: q('.app-cam'), paper: q('.app-paper'), na: q('.app-na'), nb: q('.app-nb'), fill: q('.app-fill'), frame: q('.app-frame'), stamp: q('.app-stamp') });
+    this.kick = W.split(q('.app-kick'));
+    this.la = W.split(q('.app-la')); this.lb = W.split(q('.app-lb'));
+    this.line = W.split(q('.app-l')); this.sub = W.split(q('.app-s'));
+  },
+  render(t) {
+    W.drift(this.paper, t, -26, 14, 1.03, 1.0, 6.5);
+    this.cam.style.transform = 'translateX(' + lerp(0, -18, eio(seg(t, 0, 6.5))).toFixed(2) + 'px)';
+    W.rise(this.kick, t, 0, { stagger: 0.03, dur: 0.45 });
+    W.rise(this.la, t, 0.1);
+    // 자사앱: 5.5%에서 31.4%까지 차오른다
+    const g = eio(seg(t, 0.3, 2.0));
+    this.na.textContent = lerp(5.5, 31.4, g).toFixed(1) + '%';
+    this.na.style.opacity = eo(seg(t, 0.2, 0.5));
+    this.na.style.transform = 'translateY(' + lerp(40, 0, eo(seg(t, 0.2, 0.7))).toFixed(1) + 'px)';
+    this.fill.style.transform = 'scaleX(' + lerp(0.055, 0.314, g).toFixed(4) + ')';
+    this.fill.style.opacity = eo(seg(t, 0.2, 0.5));
+    // 배달앱 주문: 들어와 그대로 박힌다
+    W.rise(this.lb, t, 1.2);
+    const pb = eob(clamp01((t - 1.35) / 0.6), 1.3);
+    this.nb.style.transform = 'translateX(' + lerp(140, 0, pb).toFixed(1) + 'px)';
+    this.nb.style.opacity = eo(seg(t, 1.35, 1.65));
+    const fr = seg(t, 2.0, 2.4);
+    this.frame.style.opacity = eo(fr);
+    this.frame.style.transform = 'scale(' + lerp(1.06, 1, eo(fr)).toFixed(4) + ')';
+    const st = clamp01((t - 2.25) / 0.35);
+    this.stamp.style.opacity = eo(st);
+    this.stamp.style.transform = 'rotate(-4deg) scale(' + lerp(1.6, 1, eob(st, 1.8)).toFixed(3) + ')';
+    W.rise(this.line, t, 2.9, { stagger: 0.14 });
+    W.rise(this.sub, t, 4.1, { stagger: 0.07 });
+  },
+});
+};
+SCENE_SRC["stores"] = function (kit) {
+const { seg, lerp, eo, ei, eio, eob, clamp01 } = kit;
+kit.scene('stores', {
+  init(kit) {
+    const row = (cls, name, num, color) => '<div class="words ' + cls + '" style="left:160px;top:0;flex-direction:row;align-items:baseline;gap:44px"><p class="line ' + cls + '-name" style="font-size:84px">' + name + '</p><p class="num ' + cls + '-num" style="font-size:120px;color:' + color + '">' + num + '</p></div>';
+    kit.stage.append(kit.h('<div class="ground">' + W.paper('stores') + '<div class="shade"></div>' +
+      '<div class="stores-cam" style="position:absolute;inset:0">' +
+      '<div class="words" style="left:160px;top:100px"><p class="kicker stores-kick">시사점 3 · 영업이익률, 2024 → 2026</p></div>' +
+      row('stores-a', '부산 서면점', '21.0%', 'var(--accent)') +
+      row('stores-b', '광주 충장로점', '13.2%', 'var(--lilac)') +
+      '<div class="stores-gap" style="position:absolute;left:1620px;top:0;width:6px;border-radius:3px;background:var(--second);transform-origin:50% 0"></div>' +
+      '<div class="words" style="left:1650px;top:400px"><p class="sub stores-gl" style="font-weight:800">7.8%p</p></div>' +
+      '<div class="words" style="left:160px;bottom:110px;width:1600px"><h2 class="line hi stores-l" style="font-size:100px">차이를 만든 건 운영</h2><p class="sub soft stores-s">리뉴얼, 점주 교체, 인력 이탈이 이익률을 4~7%p씩 움직였습니다</p></div>' +
+      '</div></div>'));
+    const q = (s) => kit.stage.querySelector(s);
+    Object.assign(this, { cam: q('.stores-cam'), paper: q('.stores-paper'), a: q('.stores-a'), b: q('.stores-b'), na: q('.stores-a-num'), nb: q('.stores-b-num'), gap: q('.stores-gap') });
+    this.kick = W.split(q('.stores-kick'));
+    this.an = W.split(q('.stores-a-name')); this.bn = W.split(q('.stores-b-name'));
+    this.gl = W.split(q('.stores-gl'));
+    this.line = W.split(q('.stores-l')); this.sub = W.split(q('.stores-s'));
+  },
+  render(t) {
+    W.drift(this.paper, t, 18, 20, 1.0, 1.035, 6.5);
+    this.cam.style.transform = 'scale(' + lerp(1.0, 1.02, eio(seg(t, 0, 6.5))) + ')';
+    W.rise(this.kick, t, 0, { stagger: 0.03, dur: 0.45 });
+    W.rise(this.an, t, 0.15); W.rise(this.bn, t, 0.4);
+    // 두 매장이 나란히 서 있다가 위아래로 갈라진다
+    const sp = eob(clamp01((t - 1.1) / 1.3), 1.25);
+    const ya = lerp(330, 210, sp), yb = lerp(450, 560, sp);
+    this.a.style.transform = 'translateY(' + ya.toFixed(1) + 'px)';
+    this.b.style.transform = 'translateY(' + yb.toFixed(1) + 'px) rotate(' + (lerp(0, 1.2, eo(seg(t, 1.6, 2.6)))).toFixed(2) + 'deg)';
+    const c = eio(seg(t, 1.1, 2.4));
+    this.na.textContent = lerp(14.1, 21.0, c).toFixed(1) + '%';
+    this.nb.textContent = lerp(18.0, 13.2, c).toFixed(1) + '%';
+    this.na.style.opacity = eo(seg(t, 0.3, 0.7)); this.nb.style.opacity = eo(seg(t, 0.55, 0.95));
+    const top = ya + 40, bot = yb + 110;
+    this.gap.style.transform = 'translateY(' + top.toFixed(1) + 'px) scaleY(' + ((bot - top) * eo(seg(t, 1.9, 2.6))).toFixed(1) + ')';
+    this.gap.style.height = '1px';
+    W.rise(this.gl, t, 2.4);
+    W.rise(this.line, t, 3.0, { stagger: 0.15 });
+    W.rise(this.sub, t, 3.8, { stagger: 0.07 });
+  },
+});
+};
+SCENE_SRC["next"] = function (kit) {
+const { seg, lerp, eo, eio, eob, clamp01 } = kit;
+kit.scene('next', {
+  init(kit) {
+    kit.stage.append(kit.h('<div class="ground">' + W.paper('next') + '<div class="shade"></div>' +
+      '<div class="next-cam" style="position:absolute;inset:0">' +
+      '<div class="words next-list" style="left:160px;top:110px;gap:26px">' +
+        '<p class="kicker next-kick">다음 한 수</p>' +
+        '<p class="line next-a" style="font-size:76px">가격이 아니라 주문 수를</p>' +
+        '<p class="line next-b" style="font-size:76px">다운로드가 아니라 배달앱 전환을</p>' +
+        '<p class="line next-c" style="font-size:76px">평균이 아니라 매장별 조기경보를</p>' +
+      '</div>' +
+      '<div class="words next-end" style="left:160px;bottom:110px;width:1600px;gap:14px"><h1 class="line hi next-t" style="font-size:150px">다시, 주문 수로</h1><p class="sub soft next-s">피자 9개 매장 실적 리뷰 · 2020–2026</p></div>' +
+      '<svg class="art" viewBox="0 0 1920 1080"><path class="next-brush" pathLength="1" d="M160 905 C420 885 700 925 1060 896" style="fill:none;stroke:var(--accent);stroke-width:16;stroke-linecap:round;stroke-dasharray:1 1"/></svg>' +
+      '</div></div>'));
+    const q = (s) => kit.stage.querySelector(s);
+    Object.assign(this, { cam: q('.next-cam'), paper: q('.next-paper'), list: q('.next-list'), brush: q('.next-brush'), end: q('.next-end') });
+    this.kick = W.split(q('.next-kick'));
+    this.rows = ['.next-a', '.next-b', '.next-c'].map((s) => W.split(q(s)));
+    this.rowEls = ['.next-a', '.next-b', '.next-c'].map(q);
+    this.title = W.split(q('.next-t')); this.sub = W.split(q('.next-s'));
+  },
+  render(t) {
+    W.drift(this.paper, t, -20, -16, 1.0, 1.04, 7);
+    this.cam.style.transform = 'scale(' + lerp(1.0, 1.02, eio(seg(t, 0, 7))) + ')';
+    W.rise(this.kick, t, 0, { stagger: 0.03, dur: 0.45 });
+    this.rows.forEach((r, i) => {
+      W.rise(r, t, 0.25 + i * 0.85, { stagger: 0.12 });
+      // ‘아니라’ 앞의 낱말은 흐려지고, 뒤의 답이 남는다
+      const fade = eo(seg(t, 0.9 + i * 0.85, 1.4 + i * 0.85));
+      r.slice(0, 2).forEach((w) => { w.style.opacity = lerp(1, 0.42, fade); });
+    });
+    this.list.style.transform = 'translateY(' + lerp(0, -12, eio(seg(t, 3.2, 4.2))).toFixed(1) + 'px)';
+    W.rise(this.title, t, 3.4, { stagger: 0.18, dur: 0.7 });
+    this.brush.style.strokeDashoffset = (1 - eo(seg(t, 4.1, 4.9))).toFixed(4);
+    W.rise(this.sub, t, 4.4, { stagger: 0.06 });
+    this.end.style.transform = 'translateX(' + (1.5 * Math.max(0, t - 4)).toFixed(2) + 'px)';
+  },
+});
+};
+</script>
+<script>
+'use strict';
+const stage = document.getElementById('stage');
+const list = []; let acc = 0;
+for (const s of CUT.scenes) {
+  const el = document.createElement('div'); el.className = 'scene'; el.hidden = true; stage.appendChild(el);
+  const k = Object.assign({}, base, { stage: el, dur: s.dur, start: acc });
+  let def = null; k.scene = (id, d) => { def = d; };
+  SCENE_SRC[s.id](k);
+  const obj = Object.create(def);
+  if (def.init) def.init.call(obj, k);
+  list.push({ id: s.id, start: acc, dur: s.dur, el, obj, k });
+  acc += s.dur;
+}
+const TOTAL = acc;
+let cur = null;
+function renderAt(t) {
+  let sc = list[list.length - 1];
+  for (const s of list) if (t < s.start + s.dur) { sc = s; break; }
+  if (cur !== sc) { if (cur) cur.el.hidden = true; sc.el.hidden = false; cur = sc; }
+  try { sc.obj.render.call(sc.obj, Math.min(t - sc.start, sc.dur), sc.k); } catch (e) { console.error(sc.id, e); }
+}
+// ---- fit the 1920×1080 stage into the window ----
+const view = document.getElementById('view');
+function fit() {
+  const s = Math.min(view.clientWidth / 1920, view.clientHeight / 1080);
+  stage.style.transform = 'translate(' + (view.clientWidth - 1920 * s) / 2 + 'px,' + (view.clientHeight - 1080 * s) / 2 + 'px) scale(' + s + ')';
+}
+addEventListener('resize', fit); fit();
+
+// ---- a small synth for the score ----
+const EVENTS = []; let MASTER = { gain: -6, fadeOut: 1.4 };
+(function buildScore() {
+  const T = {}; for (const s of list) T[s.id] = s.start; T.END = TOTAL;
+  let bpm = 90, t0 = 0; const beat = (b) => t0 + b * 60 / bpm;
+  const when = (o) => ({ t: o.beat != null ? beat(o.beat) : o.t, d: o.beats != null ? o.beats * 60 / bpm : (o.dur || 0.5) });
+  const progs = {};
+  const midi = (p) => { const m = /^([A-G])(#|b)?(-?\d)$/.exec(p); const n = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0); return 440 * Math.pow(2, (n + (+m[3] + 1) * 12 - 69) / 12); };
+  const S = {
+    tempo(b, o) { bpm = b; t0 = (o && o.t0) || 0; },
+    beat: (n) => beat(n),
+    program(tr, patch, o) { progs[tr] = Object.assign({ patch }, o || {}); },
+    note(tr, p, o) { const w = when(o); EVENTS.push({ k: 'note', patch: (progs[tr] || {}).patch, f: midi(p), t: w.t, d: w.d, v: (o.vel || 64) / 127, pan: (progs[tr] || {}).pan || 0 }); },
+    chord(tr, ps, o) { ps.forEach((p) => S.note(tr, p, o)); },
+    pattern(tr, str, o) { for (let r = 0; r < (o.repeat || 1); r++) [...str].forEach((c, i) => { if (c === '.') return; const pitch = o.pitch[i % o.pitch.length]; S.note(tr, pitch, { beat: o.from + r * str.length / 2 + i / 2, beats: 0.45, vel: (o.vel || 64) * (c === 'X' ? 1.25 : c === 'o' ? 0.5 : 1) }); }); },
+    drum(name, o) { const w = when(o); EVENTS.push({ k: 'drum', name, t: w.t, v: (o.vel || 80) / 127 }); },
+    drums(map, o) { for (const name in map) { const str = map[name]; for (let r = 0; r < (o.repeat || 1); r++) [...str].forEach((c, i) => { if (c === '.') return; S.drum(name, { beat: o.from + r * str.length / 2 + i / 2, vel: c === 'o' ? 40 : c === 'X' ? 110 : 80 }); }); } },
+    run(tr, ps, o) { ps.forEach((p, i) => S.note(tr, p, { t: o.t + i * o.step, dur: o.step * 2, vel: o.vel })); },
+    ticks(ts, o) { ts.forEach((t) => S.fx('tick', t, o)); },
+    fx(name, t, o) { o = o || {}; EVENTS.push({ k: 'fx', name, t, d: o.dur || 0.5, v: (o.vel || 64) / 127 }); },
+    master(o) { MASTER = Object.assign(MASTER, o); },
+  };
+  const kitS = { score: (fn) => fn(S, T) };
+  (function (kit) {
+kit.score(function (S, T) {
+  const B = 60 / 90, HIT = T.next + 3.4, t0 = HIT - 36 * B;
+  S.tempo(90, { t0: t0 });
+  S.program('pad', 'pad', { rev: 0.7, gain: -2 });
+  S.program('bass', 'bass', { gain: -4 });
+  S.program('vib', 'vibes', { rev: 0.5, pan: 0.2 });
+  S.program('ep', 'ep', { rev: 0.4, pan: -0.2, gain: -3 });
+  // 열리는 그림: 조용한 패드 하나
+  S.chord('pad', ['D3', 'A3', 'F4'], { t: 0, dur: t0 + 0.2, vel: 30 });
+  S.note('vib', 'A5', { t: 0.35, dur: 1.2, vel: 34 });
+  S.note('vib', 'F5', { t: 1.4, dur: 1.2, vel: 30 });
+  const prog = [['D3', 'A3', 'F4', 'D2'], ['A#2', 'F3', 'D4', 'A#1'], ['F3', 'C4', 'A4', 'F2'], ['C3', 'G3', 'E4', 'C2']];
+  const tunes = [['D5', 'F5', 'A5', 'G5'], ['F5', 'D5', 'C5', 'D5'], ['A4', 'C5', 'F5', 'E5'], ['G4', 'C5', 'E5', 'G5']];
+  for (let bar = 0; bar < 8; bar++) {
+    const c = prog[bar % 4], b = bar * 4;
+    S.chord('pad', c.slice(0, 3), { beat: b, beats: 4, vel: 38 + bar * 2 });
+    S.note('bass', c[3], { beat: b, beats: 1.5, vel: 60 });
+    S.note('bass', c[3], { beat: b + 2.5, beats: 1, vel: 48 });
+    if (bar >= 1) tunes[bar % 4].forEach((p, i) => S.note('vib', p, { beat: b + i, beats: 0.9, vel: 46 + (i === 0 ? 8 : 0) }));
+    if (bar >= 2) S.pattern('ep', '..x...x.', { from: b, repeat: 1, pitch: [c[1].replace('3', '4')], vel: 34 });
+  }
+  S.drums({ kick: 'x.....x.', hat: '..o...x.', shaker: 'oxoxoxox' }, { from: 8, repeat: 6 });
+  // 끊고, 모여서, 끝에 한 번
+  S.chord('pad', ['A#2', 'F3', 'D4'], { beat: 32, beats: 4, vel: 34 });
+  S.fx('revswell', HIT, { dur: 1.6, vel: 50 });
+  S.chord('pad', ['F3', 'C4', 'A4', 'D5'], { beat: 36, beats: 8, vel: 66 });
+  S.chord('ep', ['F4', 'A4', 'C5', 'E5'], { beat: 36, beats: 6, vel: 60 });
+  S.note('bass', 'F1', { beat: 36, beats: 6, vel: 74 });
+  S.drum('kick', { beat: 36, vel: 90 }); S.drum('crash', { beat: 36, vel: 50 });
+  S.run('vib', ['F5', 'A5', 'C6', 'E6'], { t: HIT + 0.9, step: 0.22, vel: 40 });
+  // 화면의 사건에 맞춘 효과음
+  S.fx('pop', T.price + 0.35, { vel: 50 });
+  S.fx('thud', T.price + 2.1, { vel: 62 });
+  S.fx('pop', T.app + 0.3, { vel: 46 });
+  S.fx('whoosh', T.app + 1.3, { dur: 0.4, vel: 40 });
+  S.fx('ding', T.app + 2.3, { vel: 52 });
+  S.fx('whoosh', T.stores + 1.1, { dur: 0.7, vel: 44 });
+  S.fx('tick', T.stores + 2.4, { vel: 50 });
+  [0.25, 1.1, 1.95].forEach((d) => S.fx('pop', T.next + d, { vel: 42 }));
+  S.fx('chime', HIT + 0.05, { vel: 58 });
+  S.master({ gain: -6, fadeOut: 1.4 });
+});
+  })(kitS);
+  EVENTS.sort((a, b) => a.t - b.t);
+})();
+
+let ac = null, out = null, noiseBuf = null, verb = null, soundOn = false, scheduled = [];
+function ensureAudio() {
+  if (ac) return;
+  ac = new (window.AudioContext || window.webkitAudioContext)();
+  out = ac.createGain(); out.gain.value = Math.pow(10, MASTER.gain / 20); out.connect(ac.destination);
+  noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate); const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  verb = ac.createConvolver(); const ir = ac.createBuffer(2, ac.sampleRate * 2.2, ac.sampleRate);
+  for (let c = 0; c < 2; c++) { const x = ir.getChannelData(c); for (let i = 0; i < x.length; i++) x[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / x.length, 3); }
+  verb.buffer = ir; const vg = ac.createGain(); vg.gain.value = 0.35; verb.connect(vg); vg.connect(out);
+}
+function env(g, at, a, peak, rel) { g.gain.setValueAtTime(0.0001, at); g.gain.linearRampToValueAtTime(peak, at + a); g.gain.exponentialRampToValueAtTime(0.0001, at + a + rel); }
+function voice(e, at, off) {
+  const nodes = []; const g = ac.createGain(); g.connect(out); g.connect(verb); nodes.push(g);
+  const osc = (type, f) => { const o = ac.createOscillator(); o.type = type; o.frequency.value = f; nodes.push(o); return o; };
+  const noise = () => { const s = ac.createBufferSource(); s.buffer = noiseBuf; nodes.push(s); return s; };
+  const v = e.v; let stopAt = at + 2;
+  if (e.k === 'note') {
+    const d = Math.max(0.05, e.d - off);
+    if (e.patch === 'pad') { const o1 = osc('sawtooth', e.f), o2 = osc('sawtooth', e.f * 1.005), lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900; o1.connect(lp); o2.connect(lp); lp.connect(g); g.gain.setValueAtTime(0.0001, at); g.gain.linearRampToValueAtTime(v * 0.05, at + Math.min(0.8, d / 2)); g.gain.setValueAtTime(v * 0.05, at + d); g.gain.exponentialRampToValueAtTime(0.0001, at + d + 1.2); o1.start(at); o2.start(at); stopAt = at + d + 1.3; }
+    else if (e.patch === 'bass') { const o = osc('triangle', e.f); o.connect(g); env(g, at, 0.01, v * 0.35, d + 0.2); o.start(at); stopAt = at + d + 0.3; }
+    else { const o = osc('sine', e.f), o2 = osc('sine', e.f * (e.patch === 'ep' ? 2 : 4)); const g2 = ac.createGain(); g2.gain.value = 0.25; o2.connect(g2); g2.connect(g); o.connect(g); env(g, at, 0.005, v * (e.patch === 'ep' ? 0.12 : 0.16), e.patch === 'ep' ? Math.max(0.6, d) : 1.6); o.start(at); o2.start(at); stopAt = at + 2; }
+  } else if (e.k === 'drum') {
+    if (e.name === 'kick') { const o = osc('sine', 120); o.frequency.exponentialRampToValueAtTime(40, at + 0.15); o.connect(g); env(g, at, 0.002, v * 0.6, 0.3); o.start(at); stopAt = at + 0.4; }
+    else if (e.name === 'crash') { const n = noise(), hp = ac.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 5000; n.connect(hp); hp.connect(g); env(g, at, 0.002, v * 0.18, 1.6); n.start(at); stopAt = at + 1.7; }
+    else { const n = noise(), hp = ac.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = e.name === 'shaker' ? 6000 : 8000; n.connect(hp); hp.connect(g); env(g, at, 0.002, v * (e.name === 'shaker' ? 0.05 : 0.08), 0.06); n.start(at); stopAt = at + 0.12; }
+  } else {
+    const n = e.name;
+    if (n === 'whoosh' || n === 'revswell') { const s = noise(), bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.2; const d = e.d; const st = n === 'revswell' ? at - d : at; bp.frequency.setValueAtTime(400, Math.max(st, ac.currentTime)); bp.frequency.exponentialRampToValueAtTime(3000, Math.max(st, ac.currentTime) + d); s.connect(bp); bp.connect(g); g.gain.setValueAtTime(0.0001, Math.max(st, ac.currentTime)); g.gain.linearRampToValueAtTime(v * 0.18, Math.max(st, ac.currentTime) + d * (n === 'revswell' ? 0.95 : 0.4)); g.gain.exponentialRampToValueAtTime(0.0001, Math.max(st, ac.currentTime) + d + 0.15); s.start(Math.max(st, ac.currentTime)); stopAt = st + d + 0.3; }
+    else if (n === 'thud') { const o = osc('sine', 90); o.frequency.exponentialRampToValueAtTime(45, at + 0.2); o.connect(g); env(g, at, 0.003, v * 0.6, 0.35); o.start(at); stopAt = at + 0.4; }
+    else if (n === 'tick' || n === 'pop') { const o = osc('sine', n === 'pop' ? 700 : 1800); o.frequency.exponentialRampToValueAtTime(n === 'pop' ? 1100 : 1500, at + 0.05); o.connect(g); env(g, at, 0.002, v * 0.25, 0.08); o.start(at); stopAt = at + 0.15; }
+    else { const fs = n === 'chime' ? [1047, 1568, 2093] : [1319, 1976]; fs.forEach((f) => { const o = osc('sine', f); o.connect(g); o.start(at); o.stop(at + 2.5); }); env(g, at, 0.003, v * 0.12, 2.2); stopAt = at + 2.5; }
+  }
+  nodes.forEach((x) => { if (x.stop) try { x.stop(stopAt); } catch (_) {} });
+  return nodes;
+}
+function stopSound() { scheduled.forEach((ns) => ns.forEach((x) => { try { x.stop ? x.stop() : x.disconnect(); } catch (_) {} })); scheduled = []; }
+function startSound(from) {
+  stopSound(); if (!soundOn || !playing) return;
+  const now = ac.currentTime + 0.05;
+  out.gain.cancelScheduledValues(0); out.gain.setValueAtTime(Math.pow(10, MASTER.gain / 20), now);
+  out.gain.setValueAtTime(Math.pow(10, MASTER.gain / 20), now + Math.max(0, TOTAL - MASTER.fadeOut - from));
+  out.gain.linearRampToValueAtTime(0.0001, now + Math.max(0.01, TOTAL - from));
+  for (const e of EVENTS) {
+    const end = e.t + (e.d || 0.5);
+    if (end < from || e.t > TOTAL) continue;
+    const off = Math.max(0, from - e.t);
+    if (off > 0 && e.k !== 'note') continue;
+    scheduled.push(voice(e, now + Math.max(0, e.t - from), off));
+  }
+}
+
+// ---- transport ----
+let playing = true, startWall = performance.now(), offset = 0;
+const scrub = document.getElementById('scrub'), timeEl = document.getElementById('time'), playBtn = document.getElementById('play'), soundBtn = document.getElementById('sound');
+scrub.max = TOTAL;
+const now = () => (playing ? offset + (performance.now() - startWall) / 1000 : offset);
+function seek(t) { offset = Math.max(0, Math.min(TOTAL, t)); startWall = performance.now(); if (soundOn) startSound(offset); }
+function frame() {
+  let t = now();
+  if (t >= TOTAL) { offset = 0; startWall = performance.now(); t = 0; if (soundOn) startSound(0); }
+  renderAt(t);
+  scrub.value = t; timeEl.textContent = t.toFixed(1) + ' / ' + TOTAL.toFixed(1);
+  requestAnimationFrame(frame);
+}
+playBtn.onclick = () => { if (playing) { offset = now(); playing = false; stopSound(); playBtn.textContent = '▶'; } else { playing = true; startWall = performance.now(); playBtn.textContent = '❚❚'; if (soundOn) startSound(offset); } };
+soundBtn.onclick = () => { ensureAudio(); ac.resume(); soundOn = !soundOn; soundBtn.textContent = soundOn ? '🔊 소리' : '🔇 소리'; soundBtn.setAttribute('aria-label', soundOn ? '소리 끄기' : '소리 켜기'); if (soundOn) startSound(now()); else stopSound(); };
+scrub.oninput = () => { offset = +scrub.value; startWall = performance.now(); if (soundOn) startSound(offset); };
+addEventListener('keydown', (e) => { if (e.code === 'Space') { e.preventDefault(); playBtn.click(); } });
+if (matchMedia('(prefers-reduced-motion: reduce)').matches) { playing = false; offset = TOTAL - 0.5; playBtn.textContent = '▶'; }
+renderAt(0);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
