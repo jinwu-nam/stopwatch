@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>조선 무사 스탑워치</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#07090d; --gold:#c9a15a; --gold-d:#7d6335; --red:#7e1d17; --text:#e9e4d6; --muted:#7f8590; }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{background:radial-gradient(ellipse at 50% 0%,#18202a 0%,var(--ink) 75%);color:var(--text);
+       font-family:"Noto Serif KR",serif;overflow-x:hidden}
+  #app{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 12px 40px}
+  header{text-align:center;margin-bottom:6px}
+  header h1{margin:0;font-size:14px;letter-spacing:.5em;color:var(--gold);font-weight:500}
+  #display{font-weight:900;font-size:clamp(44px,11vw,84px);letter-spacing:.04em;color:var(--text);
+           text-shadow:0 0 22px rgba(201,161,90,.25),0 2px 0 #000;font-variant-numeric:tabular-nums;margin:2px 0 16px}
+
+  #stageWrap{width:min(96vw,900px);border:1px solid #3a3326;border-radius:4px;overflow:hidden;position:relative;background:#000;
+             box-shadow:0 0 0 3px #07090d,0 0 0 4px #4a3d28,0 24px 70px rgba(0,0,0,.8)}
+  #stage{display:block;width:100%;height:auto;filter:contrast(1.08) saturate(.82)}
+  #bigGlow{position:absolute;inset:0;pointer-events:none;opacity:0;
+           background:radial-gradient(circle at 72% 55%,rgba(255,225,170,.5),transparent 55%)}
+
+  .btns{display:flex;gap:12px;width:min(96vw,900px);margin-top:18px}
+  button{flex:1;font-family:inherit;font-size:18px;font-weight:700;padding:14px;border-radius:3px;cursor:pointer;
+         background:transparent;color:var(--gold);border:1px solid var(--gold-d);letter-spacing:.3em;transition:.15s}
+  button:hover:not(:disabled){background:rgba(201,161,90,.1)}
+  button:active:not(:disabled){transform:scale(.97)}
+  button:disabled{opacity:.3;cursor:not-allowed}
+  #startBtn{background:var(--red);border-color:#a8362d;color:#f3e6d0}
+  #startBtn.running{background:#1a212b;border-color:var(--gold-d);color:var(--gold)}
+
+  #laps{list-style:none;padding:0;margin:16px 0 0;width:min(96vw,900px);max-height:200px;overflow:auto}
+  #laps li{display:flex;justify-content:space-between;padding:9px 14px;border-bottom:1px solid #1d232c;font-variant-numeric:tabular-nums;font-size:16px}
+  #laps li span:first-child{color:var(--gold)} #laps li span:last-child{color:var(--muted)}
+  .hint{margin-top:14px;font-size:12px;color:var(--muted)}
+  .dl{flex:none;margin-top:16px;font-size:13px;padding:10px 22px;letter-spacing:.15em}
+
+  /* 배경 연출 */
+  .fog{animation:drift 14s ease-in-out infinite alternate}
+  .fog2{animation:drift 19s ease-in-out infinite alternate-reverse}
+  @keyframes drift{from{transform:translateX(-40px)}to{transform:translateX(40px)}}
+  .flame{animation:flick .18s steps(2) infinite alternate;transform-origin:center}
+  @keyframes flick{from{opacity:.75}to{opacity:1}}
+  .grain{animation:grain .5s steps(4) infinite}
+  @keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-14px,9px)}50%{transform:translate(10px,-12px)}75%{transform:translate(-8px,-6px)}100%{transform:translate(0,0)}}
+
+  /* 화면 전체 효과 (랩) */
+  #lapFx{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+  #lapFlash{position:absolute;inset:0;opacity:0;background:radial-gradient(circle,#fff 0%,#dfeaf5 45%,rgba(60,70,90,.6) 100%)}
+  #lapLine{position:absolute;left:0;width:100%;height:5px;opacity:0;transform-origin:left center;
+           background:linear-gradient(90deg,transparent,#fff 12%,#eaf3ff 50%,#fff 88%,transparent);box-shadow:0 0 28px 8px rgba(190,220,255,.85)}
+  #lapStamp{position:absolute;left:50%;top:50%;font-size:clamp(160px,38vw,380px);font-weight:900;color:#8e1b17;opacity:0;
+            transform:translate(-50%,-50%);text-shadow:0 0 36px rgba(160,20,15,.7),0 6px 0 #2a0604;line-height:1;mix-blend-mode:normal}
+  #lapNum{position:absolute;left:50%;top:calc(50% + clamp(90px,20vw,200px));transform:translateX(-50%);opacity:0;
+          font-size:clamp(20px,4vw,34px);letter-spacing:.4em;color:var(--gold);font-weight:700;text-shadow:0 2px 8px #000}
+</style>
+</head>
+<body>
+<div id="app">
+  <header><h1>朝鮮武士 · 스탑워치</h1></header>
+  <div id="display">00:00.00</div>
+
+  <div id="stageWrap">
+    <svg id="stage" viewBox="0 0 900 460" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#05080d"/><stop offset=".55" stop-color="#14202b"/><stop offset="1" stop-color="#2a3744"/>
+        </linearGradient>
+        <radialGradient id="moonGlow"><stop offset="0" stop-color="#cfe2f5" stop-opacity=".75"/><stop offset="1" stop-color="#cfe2f5" stop-opacity="0"/></radialGradient>
+        <radialGradient id="torchGlow"><stop offset="0" stop-color="#ff9a3c" stop-opacity=".8"/><stop offset="1" stop-color="#ff7a1c" stop-opacity="0"/></radialGradient>
+        <radialGradient id="spot"><stop offset="0" stop-color="#9cb8d4" stop-opacity=".35"/><stop offset="1" stop-color="#9cb8d4" stop-opacity="0"/></radialGradient>
+        <radialGradient id="vig" cx=".5" cy=".5" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".85"/></radialGradient>
+        <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b2f36"/><stop offset="1" stop-color="#0c0e12"/></linearGradient>
+
+        <linearGradient id="bam" x1="0" x2="1">
+          <stop offset="0" stop-color="#0a2314"/><stop offset=".3" stop-color="#2f6a3e"/><stop offset=".5" stop-color="#6aa65f"/>
+          <stop offset=".72" stop-color="#25552f"/><stop offset="1" stop-color="#08190f"/>
+        </linearGradient>
+        <linearGradient id="cloth" x1="0" x2="1"><stop offset="0" stop-color="#2a3846"/><stop offset=".45" stop-color="#141c25"/><stop offset="1" stop-color="#0b1016"/></linearGradient>
+        <linearGradient id="clothL" x1="0" x2="1"><stop offset="0" stop-color="#33424f"/><stop offset="1" stop-color="#18212b"/></linearGradient>
+        <linearGradient id="skin" x1="0" x2="1"><stop offset="0" stop-color="#d0a47e"/><stop offset=".6" stop-color="#9c6f4d"/><stop offset="1" stop-color="#6a452f"/></linearGradient>
+        <linearGradient id="sash" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a3326"/><stop offset="1" stop-color="#4e140f"/></linearGradient>
+        <linearGradient id="blade" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#f4f8fc"/><stop offset=".45" stop-color="#aebccc"/><stop offset="1" stop-color="#5d6b7b"/>
+        </linearGradient>
+        <linearGradient id="sweepG" x1="0" x2="1"><stop offset="0" stop-color="#cfe6ff" stop-opacity="0"/><stop offset="1" stop-color="#ffffff" stop-opacity=".85"/></linearGradient>
+
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="blurSm"><feGaussianBlur stdDeviation="2.2"/></filter>
+        <filter id="blurMd"><feGaussianBlur stdDeviation="7"/></filter>
+        <filter id="blurLg" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="16"/></filter>
+        <filter id="grainF" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="4"/>
+          <feColorMatrix values="0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 1.6 -.35"/>
+        </filter>
+
+        <g id="stemL"></g>
+        <g id="stemR"></g>
+      </defs>
+
+      <!-- ===== 배경 ===== -->
+      <rect width="900" height="460" fill="url(#sky)"/>
+      <circle cx="170" cy="78" r="120" fill="url(#moonGlow)"/>
+      <circle cx="170" cy="78" r="30" fill="#e8f0f8"/>
+      <ellipse cx="190" cy="90" rx="150" ry="16" fill="#0f1822" opacity=".7" filter="url(#blurMd)"/>
+      <ellipse cx="60" cy="60" rx="110" ry="12" fill="#0f1822" opacity=".6" filter="url(#blurMd)"/>
+      <path d="M0 300 L90 250 L200 285 L330 225 L470 280 L610 235 L760 285 L900 245 L900 400 L0 400Z" fill="#0d141b" opacity=".95" filter="url(#blurSm)"/>
+      <!-- 궁궐 성문 실루엣 -->
+      <g fill="#070b10" filter="url(#blurSm)">
+        <path d="M255 225 Q330 232 352 186 Q450 160 548 186 Q570 232 645 225 Q450 204 255 225Z"/>
+        <rect x="330" y="222" width="240" height="120"/>
+        <path d="M200 342 L700 342 L700 330 L200 330Z"/>
+        <rect x="120" y="318" width="660" height="30"/>
+      </g>
+      <g fill="#ff9a3c" opacity=".5"><rect x="380" y="250" width="18" height="38"/><rect x="441" y="250" width="18" height="38"/><rect x="502" y="250" width="18" height="38"/></g>
+      <!-- 횃불 -->
+      <g>
+        <circle cx="118" cy="340" r="110" fill="url(#torchGlow)" class="flame"/>
+        <circle cx="792" cy="340" r="110" fill="url(#torchGlow)" class="flame" style="animation-delay:.07s"/>
+        <rect x="115" y="352" width="6" height="50" fill="#1b1410"/><rect x="789" y="352" width="6" height="50" fill="#1b1410"/>
+        <ellipse cx="118" cy="344" rx="7" ry="13" fill="#ffb347" class="flame"/><ellipse cx="792" cy="344" rx="7" ry="13" fill="#ffb347" class="flame" style="animation-delay:.07s"/>
+        <ellipse cx="118" cy="348" rx="3" ry="7" fill="#fff0b8"/><ellipse cx="792" cy="348" rx="3" ry="7" fill="#fff0b8"/>
+      </g>
+      <!-- 먼 대숲 (흐림) -->
+      <g fill="#0b2216" opacity=".75" filter="url(#blurSm)">
+        <rect x="30" y="100" width="12" height="310"/><rect x="82" y="170" width="9" height="240"/><rect x="838" y="120" width="12" height="290"/><rect x="872" y="190" width="9" height="220"/>
+        <rect x="160" y="210" width="8" height="200"/><rect x="740" y="200" width="8" height="200"/>
+      </g>
+      <!-- 바닥 -->
+      <rect y="398" width="900" height="62" fill="url(#floor)"/>
+      <g stroke="#3b414b" stroke-width="1" opacity=".5"><path d="M0 402H900M0 428H900"/><path d="M150 400L100 460M310 400L285 460M450 400V460M600 400L625 460M750 400L800 460"/></g>
+      <ellipse cx="450" cy="402" rx="330" ry="9" fill="#cfe0f0" opacity=".1"/>
+      <ellipse cx="450" cy="300" rx="260" ry="150" fill="url(#spot)"/>
+
+      <!-- 안개 (뒤) -->
+      <g class="fog" opacity=".22" fill="#a9bdd0" filter="url(#blurLg)"><ellipse cx="300" cy="380" rx="300" ry="22"/><ellipse cx="720" cy="365" rx="220" ry="18"/></g>
+
+      <!-- ===== 대나무 (좌 소 / 우 중) ===== -->
+      <g id="bL"></g>
+      <g id="bR"></g>
+
+      <!-- ===== 무사 ===== -->
+      <g transform="translate(450 400) scale(1.12)">
+        <g id="warriorMove"><g id="warriorFlip">
+          <ellipse cx="0" cy="0" rx="52" ry="8" fill="#000" opacity=".55"/>
+          <!-- 다리 -->
+          <path d="M-6 -88L-28 -48L-44 -10L-26 -4L-6 -46L8 -86Z" fill="#0d131a"/>
+          <path d="M-2 -88L26 -50L36 -10L16 -4L8 -46L-12 -86Z" fill="#141c25"/>
+          <path d="M-40 -34L-24 -30M-36 -22L-22 -18M18 -36L30 -32M20 -24L32 -20" stroke="#8b7f6a" stroke-width="2.5" opacity=".55"/>
+          <path d="M-48 -9Q-30 -16 -22 -4L-24 0H-50Z" fill="#050607"/><path d="M12 -9Q28 -14 42 -4L42 0H10Z" fill="#050607"/>
+
+          <g id="torso" style="transform-origin:0px -100px">
+            <!-- 도포(겉옷) -->
+            <path d="M-23 -160Q0 -170 23 -160L27 -118L42 -50Q0 -36 -42 -50L-27 -118Z" fill="url(#cloth)"/>
+            <path d="M-14 -118L-22 -52M0 -116V-44M14 -118L24 -50M30 -112L38 -56" stroke="#05080b" stroke-width="2" opacity=".6"/>
+            <path d="M23 -160L27 -118L42 -50" stroke="#ffb066" stroke-width="2" fill="none" opacity=".55"/>
+            <path d="M-23 -160L-27 -118L-42 -50" stroke="#9ec0e0" stroke-width="2" fill="none" opacity=".45"/>
+            <!-- 동정/깃 -->
+            <path d="M-9 -168L3 -138L15 -166" stroke="#cfc6ae" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            <!-- 가죽 띠 + 전대 -->
+            <path d="M-20 -158L27 -112" stroke="#25170f" stroke-width="7"/>
+            <circle cx="3" cy="-136" r="3" fill="#b8924a"/>
+            <path d="M-29 -122L29 -116L29 -104L-29 -110Z" fill="url(#sash)"/>
+            <path d="M-29 -122L29 -116" stroke="#d6745e" stroke-width="1.5" opacity=".6"/>
+            <path d="M16 -108L22 -78L30 -84L26 -108Z" fill="#6a1f16"/>
+            <!-- 빈 칼집 -->
+            <path d="M-24 -108L-70 -58" stroke="#1b110b" stroke-width="8" stroke-linecap="round"/>
+            <path d="M-24 -110L-70 -60" stroke="#6f5a3a" stroke-width="1.5" opacity=".6"/>
+            <!-- 목 / 머리 -->
+            <rect x="-7" y="-172" width="14" height="16" fill="#7c533a"/>
+            <ellipse cx="0" cy="-184" rx="14" ry="17" fill="url(#skin)"/>
+            <path d="M-12 -176Q0 -150 12 -176Q8 -166 0 -164Q-8 -166 -12 -176Z" fill="#1c1411" opacity=".45"/>
+            <ellipse cx="0" cy="-192" rx="15" ry="9" fill="#000" opacity=".38"/>
+            <path d="M-9 -186L-3 -184M3 -184L10 -186" stroke="#120c09" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M-8 -181q3 1.5 6 0M4 -181q3 1.5 6 0" stroke="#0a0605" stroke-width="1.6" fill="none"/>
+            <path d="M1 -181L-1 -174L3 -174" stroke="#6a452f" stroke-width="1.4" fill="none"/>
+            <path d="M-4 -168Q1 -166 6 -168" stroke="#3a1f18" stroke-width="1.6" fill="none"/>
+            <path d="M12 -186L14 -178" stroke="#ffb066" stroke-width="1.5" opacity=".6"/>
+            <!-- 갓 -->
+            <ellipse cx="0" cy="-198" rx="42" ry="10" fill="#0a0a0b"/>
+            <path d="M-42 -198Q0 -188 42 -198" stroke="#2a2a30" stroke-width="1.5" fill="none" opacity=".9"/>
+            <path d="M-15 -198L-14 -236Q0 -244 14 -236L15 -198Z" fill="#101012"/>
+            <path d="M-7 -236L-7 -200" stroke="#3a3d46" stroke-width="3" opacity=".7"/>
+            <path d="M-13 -190Q0 -164 13 -190" stroke="#6e1f1a" stroke-width="2" fill="none"/>
+            <circle cx="-9" cy="-175" r="1.6" fill="#a8362d"/><circle cx="0" cy="-170" r="1.6" fill="#a8362d"/><circle cx="9" cy="-175" r="1.6" fill="#a8362d"/>
+
+            <!-- 두 손으로 쥔 칼 (팔 + 칼 = 하나의 강체) -->
+            <g id="arm" style="transform-origin:4px -152px;transform:rotate(-75deg)">
+              <!-- 칼날 궤적 (타격 순간에만) -->
+              <path id="sweep" d="M84 -152L214 -152A210 210 0 0 0 152 -300L63 -208A82 82 0 0 1 84 -152Z" fill="url(#sweepG)" opacity="0" filter="url(#blurSm)"/>
+              <!-- 칼 -->
+              <rect x="30" y="-155" width="52" height="8" rx="3" fill="#1a0f09"/>
+              <path d="M36 -155L40 -147M44 -155L48 -147M52 -155L56 -147M60 -155L64 -147M68 -155L72 -147M76 -155L80 -147" stroke="#7a5a2c" stroke-width="1.6"/>
+              <circle cx="30" cy="-151" r="5" fill="#b8924a"/>
+              <ellipse cx="85" cy="-151" rx="3.5" ry="12" fill="#2a2f36"/><ellipse cx="85" cy="-151" rx="1.6" ry="9" fill="#b8924a" opacity=".8"/>
+              <path d="M88 -155L204 -160Q218 -156 221 -150L88 -146Z" fill="url(#blade)"/>
+              <path d="M92 -152.5L206 -156.5" stroke="#fff" stroke-width="1.2" opacity=".95"/>
+              <path d="M92 -148.5L214 -151" stroke="#3b4756" stroke-width="1" opacity=".6"/>
+              <!-- 뒷손 팔 -->
+              <path d="M-4 -164L38 -158Q62 -154 70 -150L66 -140L40 -142L-6 -142Z" fill="#0f151c"/>
+              <path d="M10 -160L34 -150M18 -150L40 -146" stroke="#05080b" stroke-width="1.6" opacity=".7"/>
+              <rect x="62" y="-157" width="14" height="13" rx="5" fill="url(#skin)"/>
+              <!-- 앞손 팔 -->
+              <path d="M2 -168L30 -162Q50 -156 52 -146L42 -138L26 -146L0 -144Z" fill="url(#clothL)"/>
+              <path d="M8 -164L28 -152M14 -156L34 -148" stroke="#05080b" stroke-width="1.6" opacity=".55"/>
+              <path d="M2 -168L30 -162Q50 -156 52 -146" stroke="#ffb066" stroke-width="1.4" fill="none" opacity=".55"/>
+              <rect x="42" y="-158" width="14" height="14" rx="5" fill="url(#skin)"/>
+              <path d="M44 -154H55M44 -150H55" stroke="#4a2b1c" stroke-width="1" opacity=".7"/>
+            </g>
+          </g>
+        </g></g>
+      </g>
+
+      <!-- 효과 레이어 -->
+      <g id="fx"></g>
+
+      <!-- 안개 (앞) + 필름 연출 -->
+      <g class="fog2" opacity=".18" fill="#c3d3e2" filter="url(#blurLg)"><ellipse cx="450" cy="415" rx="420" ry="26"/></g>
+      <rect width="900" height="460" fill="url(#vig)" pointer-events="none"/>
+      <rect class="grain" x="-30" y="-30" width="960" height="520" filter="url(#grainF)" opacity=".13" style="mix-blend-mode:overlay" pointer-events="none"/>
+    </svg>
+    <div id="bigGlow"></div>
+  </div>
+
+  <div class="btns">
+    <button id="lapBtn" disabled>랩</button>
+    <button id="startBtn">시작</button>
+    <button id="resetBtn" disabled>초기화</button>
+  </div>
+  <ol id="laps"></ol>
+  <div class="hint">단축키: 스페이스 = 시작/정지 · L = 랩 · R = 초기화</div>
+  <button id="dlBtn" class="dl">HTML 다운로드</button>
+</div>
+
+<div id="lapFx"><div id="lapFlash"></div><div id="lapLine"></div><div id="lapStamp">斬</div><div id="lapNum"></div></div>
+
+<script>
+const SRC='<!DOCTYPE html>\n'+document.documentElement.outerHTML;   // 다운로드용 원본 (초기 상태)
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+$('dlBtn').onclick=()=>{
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([SRC],{type:'text/html'}));
+  a.download='joseon-stopwatch.html';
+  document.body.appendChild(a);a.click();a.remove();
+};
+function el(n,a={},p){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
+const stage=$('stage'), fx=$('fx'), app=$('app');
+let seed=7; const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
+
+/* ---------- 대나무 ---------- */
+const GROUND=400, CUT_Y=250;
+const BAMBOO={
+  L:{cx:250, w:18, top:120, theta:35,  dir:-1},   // 작은 대나무(좌) "\"
+  R:{cx:650, w:36, top:28,  theta:-35, dir:1}     // 중간 대나무(우) "/"
+};
+const LEAF=['#1f4a2a','#2c5e34','#3d7a44','#58853f','#183b22'];
+function leaf(g,x,y,rot,len,col){
+  el('path',{d:`M0 0Q${len*.4} -${len*.13} ${len} 0Q${len*.4} ${len*.07} 0 0Z`,fill:col,transform:`translate(${x} ${y}) rotate(${rot})`},g);
+  el('path',{d:`M0 0L${len*.85} -1`,stroke:'#0c2314','stroke-width':.8,opacity:.6,transform:`translate(${x} ${y}) rotate(${rot})`},g);
+}
+function buildStem(k){
+  const b=BAMBOO[k], g=$('stem'+k), x=b.cx-b.w/2;
+  el('rect',{x,y:b.top,width:b.w,height:GROUND-b.top,fill:'url(#bam)'},g);
+  el('rect',{x:x+b.w*.22,y:b.top,width:1.2,height:GROUND-b.top,fill:'#0a2314',opacity:.35},g);
+  el('rect',{x:x+b.w*.62,y:b.top,width:1,height:GROUND-b.top,fill:'#0a2314',opacity:.3},g);
+  el('rect',{x:x+b.w*.84,y:b.top,width:b.w*.1,height:GROUND-b.top,fill:'#ffb066',opacity:.16},g);   // 횃불 림라이트
+  el('rect',{x:x+b.w*.05,y:b.top,width:b.w*.08,height:GROUND-b.top,fill:'#9ec0e0',opacity:.18},g);  // 달빛 림라이트
+  for(let y=GROUND-58;y>b.top+10;y-=64){
+    el('rect',{x:x-2.5,y,width:b.w+5,height:7,rx:3,fill:'#14341f'},g);
+    el('rect',{x:x-2.5,y,width:b.w+5,height:1.6,rx:1,fill:'#9fcf90',opacity:.35},g);
+  }
+  const n=b.w>30?16:10;
+  for(let i=0;i<n;i++) leaf(g,b.cx+(rnd()-.5)*8,b.top+10+rnd()*70,-170+rnd()*160,(b.w>30?58:44)+rnd()*36,LEAF[i%5]);
+  [[-1,70],[1,130]].forEach(([s,off])=>{
+    const y=b.top+off; if(y>GROUND-110)return;
+    el('path',{d:`M${b.cx} ${y}Q${b.cx+s*18} ${y-6} ${b.cx+s*40} ${y-18}`,stroke:'#1d4a2a','stroke-width':2.5,fill:'none'},g);
+    for(let i=0;i<5;i++) leaf(g,b.cx+s*40,y-18,(s>0?-60:-120)+(rnd()-.5)*90,34+rnd()*22,LEAF[(i+1)%5]);
+  });
+}
+function buildBamboo(k){
+  const defs=stage.querySelector('defs'), host=$('b'+k);
+  const low=el('g',{id:'low'+k},host), lowClip=el('clipPath',{id:'lowClip'+k},defs); el('rect',{x:-1500,y:0,width:3000,height:1500},lowClip);
+  el('use',{href:'#stem'+k},el('g',{'clip-path':`url(#lowClip${k})`},low));
+  const upMove=el('g',{id:'upMove'+k},host), upClip=el('clipPath',{id:'upClip'+k},defs); el('rect',{x:-1500,y:-1500,width:3000,height:1500},upClip);
+  el('use',{href:'#stem'+k},el('g',{'clip-path':`url(#upClip${k})`},upMove));
+  setClip(k,0,BAMBOO[k].cx,CUT_Y);
+}
+function setClip(k,theta,cx,cy){
+  const t=`translate(${cx} ${cy}) rotate(${theta})`;
+  $('lowClip'+k).firstChild.setAttribute('transform',t);
+  $('upClip'+k).firstChild.setAttribute('transform',t);
+}
+['L','R'].forEach(k=>{buildStem(k);buildBamboo(k)});
+
+/* ---------- 효과 도구 ---------- */
+function leaves(x,y,n,power){
+  for(let i=0;i<n;i++){
+    const p=el('path',{d:'M0 0Q8 -4 17 0Q8 3 0 0Z',fill:LEAF[i%5]},fx);
+    const a=Math.random()*Math.PI*2, d=(30+Math.random()*90)*power, dx=Math.cos(a)*d, dy=Math.sin(a)*d*.7;
+    p.animate([{transform:`translate(${x}px,${y}px) rotate(0deg)`,opacity:1},
+               {transform:`translate(${x+dx}px,${y+dy+60}px) rotate(${(Math.random()-.5)*800}deg)`,opacity:0}],
+              {duration:550+Math.random()*400,easing:'cubic-bezier(.2,.7,.4,1)'}).onfinish=()=>p.remove();
+  }
+}
+function splinters(x,y,n,power,theta){
+  for(let i=0;i<n;i++){
+    const l=el('rect',{x:0,y:0,width:6+Math.random()*12,height:1.6,fill:i%3?'#d8e6b0':'#9fcf90'},fx);
+    const a=(theta*Math.PI/180)+(Math.random()-.5)*2.4+(i%2?Math.PI:0), d=(40+Math.random()*100)*power;
+    l.animate([{transform:`translate(${x}px,${y}px) rotate(${a}rad)`,opacity:1},
+               {transform:`translate(${x+Math.cos(a)*d}px,${y+Math.sin(a)*d+30}px) rotate(${a+(Math.random()-.5)*6}rad)`,opacity:0}],
+              {duration:350+Math.random()*250,easing:'ease-out'}).onfinish=()=>l.remove();
+  }
+}
+function trail(x1,y1,x2,y2,w,color){
+  const L=Math.hypot(x2-x1,y2-y1), l=el('line',{x1,y1,x2,y2,stroke:color||'#fff','stroke-width':w,'stroke-linecap':'round','stroke-dasharray':L,filter:'url(#glow)'},fx);
+  l.animate([{strokeDashoffset:L,opacity:1},{strokeDashoffset:0,opacity:1,offset:.25},{strokeDashoffset:0,opacity:0}],{duration:360}).onfinish=()=>l.remove();
+}
+function ring(x,y,r){
+  const c=el('circle',{cx:x,cy:y,r:10,fill:'none',stroke:'#cfe6ff','stroke-width':3},fx);
+  c.animate([{r:10,opacity:.8,strokeWidth:5},{r:r,opacity:0,strokeWidth:1}],{duration:520,easing:'ease-out'}).onfinish=()=>c.remove();
+}
+function shake(elm,amp,dur){
+  elm.animate([{transform:'translate(0,0)'},{transform:`translate(${-amp}px,${amp*.6}px)`},{transform:`translate(${amp}px,${-amp*.5}px)`},
+               {transform:`translate(${-amp*.6}px,${-amp*.4}px)`},{transform:`translate(${amp*.4}px,${amp*.3}px)`},{transform:'translate(0,0)'}],{duration:dur});
+}
+function impact(){ // 타격 순간 밝기 번쩍임
+  stage.animate([{filter:'contrast(1.08) saturate(.82) brightness(1)'},{filter:'contrast(1.3) saturate(.5) brightness(1.9)',offset:.15},{filter:'contrast(1.08) saturate(.82) brightness(1)'}],{duration:260});
+}
+
+/* ---------- 무사 동작 (두 손 베기) ---------- */
+const move=$('warriorMove'), flip=$('warriorFlip'), arm=$('arm'), torso=$('torso'), sweep=$('sweep');
+const SWING=560;
+function warrior(kind,dir){
+  const D=SWING;
+  if(kind==='lap'){
+    flip.style.transform='scaleX(1)';
+    arm.animate([{transform:'rotate(-75deg)'},{transform:'rotate(-172deg)',offset:.22,easing:'cubic-bezier(.6,0,1,.6)'},{transform:'rotate(4deg)',offset:.32},{transform:'rotate(4deg)',offset:.62},{transform:'rotate(-75deg)'}],{duration:D});
+    flip.animate([{transform:'scaleX(1)'},{transform:'scaleX(1)',offset:.32},{transform:'scaleX(-1)',offset:.42},{transform:'scaleX(-1)',offset:.7},{transform:'scaleX(1)'}],{duration:D});
+    torso.animate([{transform:'rotate(0deg)'},{transform:'rotate(-9deg)',offset:.22},{transform:'rotate(8deg)',offset:.34},{transform:'rotate(0deg)'}],{duration:D});
+    sweep.animate([{opacity:0},{opacity:0,offset:.22},{opacity:.95,offset:.3},{opacity:0,offset:.46},{opacity:0}],{duration:D});
+    return;
+  }
+  flip.style.transform=`scaleX(${dir})`;
+  const lunge=dir*(kind==='big'?60:36);
+  move.animate([{transform:'translateX(0)'},{transform:`translateX(${-dir*10}px)`,offset:.2},{transform:`translateX(${lunge}px)`,offset:.32,easing:'ease-out'},{transform:`translateX(${lunge}px)`,offset:.62},{transform:'translateX(0)'}],{duration:D});
+  arm.animate([{transform:'rotate(-75deg)'},{transform:'rotate(-165deg)',offset:.22,easing:'cubic-bezier(.6,0,1,.6)'},{transform:'rotate(58deg)',offset:.33},{transform:'rotate(52deg)',offset:.62},{transform:'rotate(-75deg)'}],{duration:D});
+  torso.animate([{transform:'rotate(0deg)'},{transform:'rotate(-10deg)',offset:.22},{transform:'rotate(13deg)',offset:.34},{transform:'rotate(10deg)',offset:.62},{transform:'rotate(0deg)'}],{duration:D});
+  sweep.animate([{opacity:0},{opacity:0,offset:.22},{opacity:.95,offset:.3},{opacity:0,offset:.46},{opacity:0}],{duration:D});
+}
+
+/* ---------- 대나무 베기 ---------- */
+const CUT_AT=170;
+function cut(k,theta,big){
+  const b=BAMBOO[k], defs=stage.querySelector('defs'), host=$('b'+k), cx=b.cx, cy=CUT_Y;
+  setClip(k,theta,cx,cy);
+  const id='fc'+Math.random().toString(36).slice(2), cp=el('clipPath',{id},defs);
+  el('rect',{x:-1500,y:-1500,width:3000,height:1500,transform:`translate(${cx} ${cy}) rotate(${theta})`},cp);
+  const fm=el('g',{},host); el('use',{href:'#stem'+k},el('g',{'clip-path':`url(#${id})`},fm));
+  const slide=(theta===0?(k==='L'?-1:1):(theta>0?1:-1));
+  fm.style.transformOrigin=`${cx}px ${cy}px`;
+  fm.animate([{transform:'translate(0,0) rotate(0deg)',opacity:1},
+              {transform:`translate(${slide*24}px,-6px) rotate(${slide*5}deg)`,opacity:1,offset:.25},
+              {transform:`translate(${slide*(big?100:70)}px,${big?200:150}px) rotate(${slide*(big?70:42)}deg)`,opacity:0}],
+             {duration:500,easing:'ease-in'}).onfinish=()=>{fm.remove();cp.remove()};
+  $('upMove'+k).animate([{opacity:0,transform:'translateY(40px)'},{opacity:0,transform:'translateY(40px)',offset:.35},{opacity:1,transform:'translateY(0)'}],{duration:500,easing:'ease-out'});
+  $('low'+k).animate([{transform:'translateX(0)'},{transform:`translateX(${slide*-4}px)`},{transform:'translateX(2px)'},{transform:'translateX(0)'}],{duration:260});
+  leaves(cx,cy,big?24:11,big?1.6:1);
+  splinters(cx,cy,big?22:10,big?1.5:1,theta);
+}
+function slashTrail(k,theta,big){
+  const b=BAMBOO[k], r=theta*Math.PI/180, L=big?170:105, c=Math.cos(r)*L, s=Math.sin(r)*L;
+  trail(b.cx-c,CUT_Y-s,b.cx+c,CUT_Y+s,big?6:3.5,'#fff');
+  if(big)trail(b.cx-c*.9,CUT_Y-s*.9+10,b.cx+c*.9,CUT_Y+s*.9+10,2.5,'#bcd8f5');
+}
+
+/* ---------- 트리거 ---------- */
+function smallStrike(){            // 5초: 좌측 작은 대나무 대각선
+  warrior('small',-1);
+  setTimeout(()=>{slashTrail('L',BAMBOO.L.theta,false);cut('L',BAMBOO.L.theta,false)},CUT_AT);
+}
+function bigStrike(){              // 10초: 우측 중간 대나무 반대 대각선 + 큰 연출
+  warrior('big',1);
+  setTimeout(()=>{
+    slashTrail('R',BAMBOO.R.theta,true);cut('R',BAMBOO.R.theta,true);
+    ring(BAMBOO.R.cx,CUT_Y,150); impact();
+    $('bigGlow').animate([{opacity:0},{opacity:1,offset:.2},{opacity:0}],{duration:600});
+    shake($('stageWrap'),8,420);
+  },CUT_AT);
+}
+function lapStrike(n){             // 랩: 두 대나무 동시에 가로 + 화면 전체 효과
+  warrior('lap');
+  setTimeout(()=>{
+    trail(0,CUT_Y,900,CUT_Y,8,'#fff'); trail(0,CUT_Y+10,900,CUT_Y+10,3,'#bcd8f5');
+    cut('L',0,true); cut('R',0,true); ring(450,CUT_Y,260); impact();
+    fullScreen(n);
+  },CUT_AT);
+}
+function fullScreen(n){
+  const pt=stage.createSVGPoint(); pt.x=450; pt.y=CUT_Y; const sp=pt.matrixTransform(stage.getScreenCTM());
+  const line=$('lapLine'); line.style.top=(sp.y-2)+'px';
+  line.animate([{opacity:1,transform:'scaleX(0)'},{opacity:1,transform:'scaleX(1)',offset:.25},{opacity:0,transform:'scaleX(1)'}],{duration:650,easing:'ease-out'});
+  $('lapFlash').animate([{opacity:0},{opacity:.85,offset:.1},{opacity:0}],{duration:480});
+  $('lapStamp').animate([{opacity:0,transform:'translate(-50%,-50%) scale(2.2) rotate(-10deg)'},
+                         {opacity:.95,transform:'translate(-50%,-50%) scale(1) rotate(-6deg)',offset:.2},
+                         {opacity:.95,transform:'translate(-50%,-50%) scale(1.04) rotate(-6deg)',offset:.65},
+                         {opacity:0,transform:'translate(-50%,-50%) scale(1.1) rotate(-6deg)'}],{duration:1000,easing:'ease-out'});
+  const num=$('lapNum'); num.textContent='LAP '+n;
+  num.animate([{opacity:0},{opacity:1,offset:.2},{opacity:1,offset:.65},{opacity:0}],{duration:1000});
+  shake(app,14,520);
+}
+
+/* ---------- 스탑워치 ---------- */
+const display=$('display'),startBtn=$('startBtn'),lapBtn=$('lapBtn'),resetBtn=$('resetBtn'),lapsEl=$('laps');
+let running=false,startTime=0,elapsed=0,raf=null,lastLap=0,lapCount=0,lastMark=0;
+function fmt(ms){const m=Math.floor(ms/60000),s=Math.floor(ms%60000/1000),c=Math.floor(ms%1000/10);
+  return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+'.'+String(c).padStart(2,'0')}
+function tick(){
+  elapsed=performance.now()-startTime;
+  display.textContent=fmt(elapsed);
+  const mark=Math.floor(elapsed/5000);
+  while(lastMark<mark){lastMark++; (lastMark%2===0)?bigStrike():smallStrike()}
+  raf=requestAnimationFrame(tick);
+}
+function toggle(){
+  if(running){cancelAnimationFrame(raf);running=false;startBtn.textContent='계속';startBtn.classList.remove('running');lapBtn.disabled=true}
+  else{startTime=performance.now()-elapsed;running=true;raf=requestAnimationFrame(tick);startBtn.textContent='정지';startBtn.classList.add('running');lapBtn.disabled=false;resetBtn.disabled=false}
+}
+function lap(){
+  if(!running)return;
+  lapCount++;
+  const li=document.createElement('li');
+  li.innerHTML=`<span>랩 ${lapCount}</span><span>${fmt(elapsed-lastLap)}</span><span>${fmt(elapsed)}</span>`;
+  lapsEl.prepend(li); lastLap=elapsed;
+  lapStrike(lapCount);
+}
+function reset(){
+  cancelAnimationFrame(raf);running=false;elapsed=0;lastLap=0;lapCount=0;lastMark=0;
+  display.textContent=fmt(0);lapsEl.innerHTML='';
+  startBtn.textContent='시작';startBtn.classList.remove('running');lapBtn.disabled=true;resetBtn.disabled=true;
+}
+startBtn.onclick=toggle;lapBtn.onclick=lap;resetBtn.onclick=reset;
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space'){e.preventDefault();toggle()}
+  else if(e.key.toLowerCase()==='l')lap();
+  else if(e.key.toLowerCase()==='r')reset();
+});
+</script>
+</body>
+</html>
